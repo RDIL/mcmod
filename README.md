@@ -1,0 +1,2 @@
+# mcmod
+Minecraft mod template.
