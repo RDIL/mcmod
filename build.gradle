@@ -84,30 +84,4 @@ processResources {
     }
 }
 
-jar {
-    dependsOn configurations.compile
-    from {
-        configurations.embed.collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }
-    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
-    manifest.attributes(
-        "MixinConfigs": 'mixins.' + project.archivesBaseName + '.json',
-        "TweakOrder": "0",
-        "TweakClass": "",
-        "Manifest-Version": 1.0
-    )
-    configurations.embed.each { dep ->
-        from(project.zipTree(dep)) {
-            exclude 'META-INF', 'META-INF/**'
-            exclude 'org/jetbrains/annotations', 'org/jetbrains/annotations/**'
-        }
-    }
-}
-
-artifacts {
-    archives jar
-}
-
 defaultTasks "build"
