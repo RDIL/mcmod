@@ -1,0 +1,106 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://hyperiumjailbreak.mycloudrepo.io/public/repositories/forge-proxy"
+        }
+        maven {
+            url "https://hyperiumjailbreak.mycloudrepo.io/public/repositories/sponge-proxy"
+        }
+    }
+    dependencies {
+        classpath "net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT"
+        classpath "org.spongepowered:MixinGradle:0.6-SNAPSHOT"
+    }
+}
+
+apply plugin: "java"
+apply plugin: "net.minecraftforge.gradle.forge"
+apply plugin: "org.spongepowered.mixin"
+
+configurations {
+    embed
+    compile.extendsFrom(embed)
+}
+
+sourceCompatibility = targetCompatibility = 1.8
+compileJava.options.encoding = "UTF-8"
+compileJava.options.compilerArgs << "-Xlint:none"
+version = "0.1.0"
+group = "rocks.rdil"
+archivesBaseName = "MinecraftMod"
+description = ""
+tweaker = "rocks.rdil." + project.archivesBaseName.toLowerCase() + "ModBootstrap"
+
+minecraft {
+    version = "1.8.9-11.15.1.2318-1.8.9"
+    runDir = "run"
+    mappings = "stable-22"
+    makeObfSourceJar = false
+}
+
+dependencies {
+    embed('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
+        exclude module: 'launchwrapper'
+        exclude module: 'guava'
+        exclude module: 'gson'
+        exclude module: 'commons-io'
+        exclude module: 'log4j-core'
+    }
+}
+
+mixin {
+    defaultObfuscationEnv searge
+    add sourceSets.main, "mixin.${project.archivesBaseName}.refmap.json"
+    disableRefMapWarning true
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+    inputs.property "modid", project.archivesBaseName
+    inputs.property "description", project.description
+
+    from(sourceSets.main.resources.srcDirs) {
+        include "mcmod.info"
+        include "litemod.json"
+        include "mixins." + project.modid + ".json"
+        expand "version": project.version,
+               "mcversion": project.minecraft.version,
+               "modid": project.archivesBaseName,
+               "description": project.description
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude "mcmod.info"
+        exclude "litemod.json"
+        exclude "mixins." + project.modid + ".json"
+    }
+}
+
+jar {
+    dependsOn configurations.compile
+    from {
+        configurations.embed.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
+    manifest.attributes(
+        "MixinConfigs": 'mixins.' + project.archivesBaseName + '.json',
+        "TweakOrder": "0",
+        "TweakClass": "",
+        "Manifest-Version": 1.0
+    )
+    configurations.embed.each { dep ->
+        from(project.zipTree(dep)) {
+            exclude 'META-INF', 'META-INF/**'
+            exclude 'org/jetbrains/annotations', 'org/jetbrains/annotations/**'
+        }
+    }
+}
+
+artifacts {
+    archives jar
+}
+
+defaultTasks "build"

@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "compatibilityLevel": "JAVA_8",
+  "package": "rocks.rdil.${modid}.mixins",
+  "refmap": "mixin.${modid}.refmap.json",
+  "verbose": false,
+  "minVersion": "0.7.10",
+  "mixins": [
+
+  ]
+}
