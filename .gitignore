@@ -11,3 +11,6 @@ run
 .classpath
 .project
 bin
+
+.theia
+.vscode

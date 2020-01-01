@@ -6,7 +6,9 @@ buildscript {
         maven {
             url "https://hyperiumjailbreak.mycloudrepo.io/public/repositories/sponge-proxy"
         }
-        mavenCentral()
+        maven {
+            url "https://hyperiumjailbreak.mycloudrepo.io/public/repositories/maven-central-proxy"
+        }
     }
     dependencies {
         classpath "net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT"
@@ -30,7 +32,7 @@ version = "0.1.0"
 group = "rocks.rdil"
 archivesBaseName = "MinecraftMod"
 description = ""
-String tweaker = "rocks.rdil." + project.archivesBaseName.toLowerCase() + "ModBootstrap"
+String tweaker = "${project.group}.${project.archivesBaseName.toLowerCase()}.ModBootstrap"
 
 minecraft {
     version = "1.8.9-11.15.1.2318-1.8.9"
