@@ -1,4 +1,4 @@
-package rocks.rdil.minecraftmod;
+package rocks.rdil.mcmod;
 
 import java.io.File;
 import java.lang.reflect.Method;

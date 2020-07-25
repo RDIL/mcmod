@@ -3,13 +3,16 @@ buildscript {
         maven {
             url "https://hyperiumjailbreak.mycloudrepo.io/public/repositories/forge-proxy"
         }
+
         maven {
             url "https://hyperiumjailbreak.mycloudrepo.io/public/repositories/sponge-proxy"
         }
+
         maven {
             url "https://hyperiumjailbreak.mycloudrepo.io/public/repositories/maven-central-proxy"
         }
     }
+
     dependencies {
         classpath "net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT"
         classpath "org.spongepowered:mixingradle:0.6-SNAPSHOT"
@@ -25,20 +28,24 @@ configurations {
     compile.extendsFrom(embed)
 }
 
-sourceCompatibility = targetCompatibility = 1.8
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 compileJava.options.encoding = "UTF-8"
 compileJava.options.compilerArgs << "-Xlint:none"
+
 version = "0.1.0"
 group = "rocks.rdil"
-archivesBaseName = "MinecraftMod"
+archivesBaseName = "MCMod"
 description = ""
+
 String tweaker = "${project.group}.${project.archivesBaseName.toLowerCase()}.ModBootstrap"
 
 minecraft {
-    version = "1.8.9-11.15.1.2318-1.8.9"
-    runDir = "run"
-    mappings = "stable_22"
-    makeObfSourceJar = false
+    version "1.8.9-11.15.1.2318-1.8.9"
+    runDir "run"
+    mappings "stable_22"
+    makeObfSourceJar false
 }
 
 repositories {
@@ -48,31 +55,30 @@ repositories {
 }
 
 dependencies {
-    embed('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
-        exclude module: 'launchwrapper'
-        exclude module: 'guava'
-        exclude module: 'gson'
-        exclude module: 'commons-io'
-        exclude module: 'log4j-core'
+    embed("org.spongepowered:mixin:0.7.11-SNAPSHOT") {
+        exclude module: "launchwrapper"
+        exclude module: "guava"
+        exclude module: "gson"
+        exclude module: "commons-io"
+        exclude module: "log4j-core"
     }
 }
 
 mixin {
     defaultObfuscationEnv searge
-    add sourceSets.main, "mixin.${project.archivesBaseName}.refmap.json"
+    add sourceSets.main, "mixin.${project.archivesBaseName.toLowerCase()}.refmap.json"
     disableRefMapWarning true
 }
 
 processResources {
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
-    inputs.property "modid", project.archivesBaseName
+    inputs.property "modid", project.archivesBaseName.toLowerCase()
     inputs.property "description", project.description
 
     from(sourceSets.main.resources.srcDirs) {
         include "mcmod.info"
-        include "litemod.json"
-        include "mixins." + project.archivesBaseName + ".json"
+        include "mixins." + project.archivesBaseName.toLowerCase() + ".json"
         expand "version": project.version,
                "mcversion": project.minecraft.version,
                "modid": project.archivesBaseName,
@@ -81,9 +87,6 @@ processResources {
 
     from(sourceSets.main.resources.srcDirs) {
         exclude "mcmod.info"
-        exclude "litemod.json"
         exclude "mixins." + project.archivesBaseName + ".json"
     }
 }
-
-defaultTasks "build"
