@@ -4,8 +4,8 @@
     "name": "${modid}",
     "description": "${description}",
     "version": "${version}",
-    "mcversion": "${mcversion}",
-    "url": "https://rdil.rocks",
+    "mcversion": "1.8.9",
+    "url": "https://rdil.rocks/",
     "updateUrl": "",
     "authorList": [
       "Reece Dunham"

@@ -1,15 +1,31 @@
 buildscript {
     repositories {
-        maven {
-            url "https://hyperiumjailbreak.mycloudrepo.io/public/repositories/forge-proxy"
-        }
-
-        maven {
-            url "https://hyperiumjailbreak.mycloudrepo.io/public/repositories/sponge-proxy"
-        }
-
-        maven {
-            url "https://hyperiumjailbreak.mycloudrepo.io/public/repositories/maven-central-proxy"
+        if (project.getProperty("useProxies") == true) {
+            maven {
+                url "https://hyperiumjailbreak.mycloudrepo.io/public/repositories/forge-proxy"
+                name "Forge Proxy"
+            }
+            maven {
+                url "https://rdil.mycloudrepo.io/public/repositories/maven-central-proxy"
+                name "Maven Central Proxy"
+            }
+            maven {
+                url "https://hyperiumjailbreak.mycloudrepo.io/public/repositories/sponge-proxy"
+                name "SpongePowered Proxy"
+            }
+        } else {
+            maven {
+                url "https://files.minecraftforge.net/maven/"
+                name "Forge"
+            }
+            maven {
+                url "https://repo.maven.apache.org/maven2/"
+                name "Maven Central"
+            }
+            maven {
+                url "https://repo.spongepowered.org/maven/"
+                name "SpongePowered"
+            }
         }
     }
 
@@ -32,14 +48,8 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 compileJava.options.encoding = "UTF-8"
-compileJava.options.compilerArgs << "-Xlint:none"
 
-version = "0.1.0"
-group = "rocks.rdil"
-archivesBaseName = "MCMod"
-description = ""
-
-String tweaker = "${project.group}.${project.archivesBaseName.toLowerCase()}.ModBootstrap"
+final def tweaker = "${project.group}.${rootProject.name}.tweaker.ModPartialMixinTweaker"
 
 minecraft {
     version "1.8.9-11.15.1.2318-1.8.9"
@@ -49,8 +59,16 @@ minecraft {
 }
 
 repositories {
-    maven {
-        url "https://hyperiumjailbreak.mycloudrepo.io/public/repositories/sponge-proxy"
+    if (project.getProperty("useProxies") == true) {
+        maven {
+            url "https://hyperiumjailbreak.mycloudrepo.io/public/repositories/sponge-proxy"
+            name "SpongePowered Proxy"
+        }
+    } else {
+        maven {
+            url "https://repo.spongepowered.org/maven/"
+            name "SpongePowered"
+        }
     }
 }
 
@@ -66,27 +84,40 @@ dependencies {
 
 mixin {
     defaultObfuscationEnv searge
-    add sourceSets.main, "mixin.${project.archivesBaseName.toLowerCase()}.refmap.json"
+    add sourceSets.main, "mixin.${rootProject.name}.refmap.json"
     disableRefMapWarning true
 }
 
 processResources {
     inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
-    inputs.property "modid", project.archivesBaseName.toLowerCase()
+    inputs.property "modid", rootProject.name
     inputs.property "description", project.description
+    inputs.property "group", project.group
 
     from(sourceSets.main.resources.srcDirs) {
         include "mcmod.info"
-        include "mixins." + project.archivesBaseName.toLowerCase() + ".json"
+        include "mixins." + rootProject.name + ".json"
         expand "version": project.version,
-               "mcversion": project.minecraft.version,
-               "modid": project.archivesBaseName,
-               "description": project.description
+               "modid": rootProject.name,
+               "description": project.description,
+               "group": project.group
     }
 
     from(sourceSets.main.resources.srcDirs) {
         exclude "mcmod.info"
-        exclude "mixins." + project.archivesBaseName + ".json"
+        exclude "mixins." + rootProject.name + ".json"
+    }
+}
+
+jar {
+    manifest.attributes(
+        'FMLCorePlugin': tweaker,
+        'ForceLoadAsMod': true,
+        'FMLCorePluginContainsFMLMod': true,
+        'ModSide': 'CLIENT'
+    )
+
+    from configurations.embed.collect {
+        it.isDirectory() ? it : zipTree(it)
     }
 }
